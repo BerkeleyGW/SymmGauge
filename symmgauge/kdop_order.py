@@ -3,9 +3,9 @@
 """
 8/7/2021
 Author: jwruan
-input: wfn_co.h5, wfn-allk.h5 
+input: wfn_co.h5, wfn-allk.h5
 
-output: 
+output:
 dnc_10co_2fi-check.npy
 ======
 Created on Sat Dec 12 22:21:19 2020
@@ -29,10 +29,11 @@ f_fi = h5py.File("wfn-allk.h5")
 
 nk_co = 2
 nk_fi = 4341
+ind_kc = 2170
 
 gcut = 43556
 tmp = f_co['wfns/coeffs'][()]
-look = tmp
+# look = tmp
 tmp = tmp[:,:,:,0] + 1j*tmp[:,:,:,1]
 tmp = tmp.reshape(250, 2, nk_co, -1 )   # 250: dimension for co bands
 coeff_co = tmp.transpose(2,0,1,3)
