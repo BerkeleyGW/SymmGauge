@@ -161,12 +161,18 @@ def _overlap_2_center(fname1, fname2, nv_co, nc_co, nv_fi, nc_fi,\
     bstart_fi = ifmaxone_fi - nv_fi
     bend_fi = ifmaxone_fi + nc_fi
 
-    coeff_co = wfnco.read_wfn()
-    coeff_fi = wfnfi.read_wfn()
+    coeff_fi = wfnfi.read_wfn()     # nk x nb x nspin x ngvec
+    if fname1 == fname2:
+        print("Input files are the same. Copy to coeff...")
+        # coeff_co = coeff_fi
+        coeff_co_k0 = coeff_fi[idx_k0, ...]  # nb x nspin x ngvec
+    else:
+        coeff_co_k0 = wfnco.read_wfn()
+        coeff_co_k0 = coeff_co_k0[idx_k0,...]  # nb x nspin x ngvec
 
     if gcut:
         coeff_fi = coeff_fi[:, :, :, :gcut]
-        coeff_co = coeff_co[:, :, :, :gcut]
+        coeff_co_k0 = coeff_co_k0[:, :, :gcut]
 
     nbnd_co = nv_co + nc_co
     nbnd_fi = nv_fi + nc_fi
@@ -174,10 +180,13 @@ def _overlap_2_center(fname1, fname2, nv_co, nc_co, nv_fi, nc_fi,\
     dn0n = np.zeros((nk_fi, nbnd_co, nbnd_fi), dtype=complex)    # nk x co x fi
 
     print(" Start to calculate the overlap ")
+    print("The center kpoint is:")
+    print(wfnco.rk[idx_k0])
+
     for k in range(nk_fi):
         for i, idx_co in enumerate(range(bstart_co, bend_co)):
             for j, idx_fi in enumerate(range(bstart_fi, bend_fi)):
-                dn0n[k, i, j] = wfndot(coeff_co[idx_k0, idx_co], \
+                dn0n[k, i, j] = wfndot(coeff_co_k0[idx_co], \
                                        coeff_fi[k, idx_fi])            # <phi|psi >
 
     print("Finish calculate the overlap")
