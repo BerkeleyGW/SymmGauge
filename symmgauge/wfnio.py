@@ -16,7 +16,8 @@ class Wfn:
 
         f_fi = h5py.File(self.fname, 'r')
 
-        self.nk_fi = f_fi['/mf_header/kpoints/nrk'][()]
+        self.nk_fi = f_fi['/mf_header/kpoints/nrk'][()] # will be delete
+        self.nk = f_fi['/mf_header/kpoints/nrk'][()]
         self.rk = f_fi['/mf_header/kpoints/rk'][()]
 
         self.mnb_fi= f_fi ['/mf_header/kpoints/mnband'][()]
@@ -46,6 +47,8 @@ class Wfn:
 
     def read_wfn(self, use_ngk=True):
 
+        # TODO: need combine with self.read_header()
+
         fname = self.fname
         f_fi = h5py.File(fname, 'r')
 
@@ -63,7 +66,7 @@ class Wfn:
         print("Reading wfns ...")
 
         tmp = f_fi['wfns/coeffs'][()]
-        tmp = tmp[:, :, :, 0] + 1j*tmp[:, :, :, 1]
+        tmp = tmp[:, :, :, 0] + 1j*tmp[:, :, :, 1]   # nb x nspinor x (ngktotal)
 
         print("Finished Reading wfns ...")
 
@@ -83,44 +86,50 @@ class Wfn:
 
         return coeff_fi
 
+    def read_wfn_range(self, bstart, bend, use_ngk=True):
 
-def read_wfn(fname, use_ngk=True):
+        # TODO: need combine with self.read_header()
 
-    f_fi = h5py.File(fname, 'r')
+        fname = self.fname
+        f_fi = h5py.File(fname, 'r')
 
-    nk_fi = f_fi['/mf_header/kpoints/nrk'][()]
-    mnb_fi= f_fi ['/mf_header/kpoints/mnband'][()]
-    print("bands are {}".format(mnb_fi))
+        nk_fi = f_fi['/mf_header/kpoints/nrk'][()]
+        mnb_fi= f_fi ['/mf_header/kpoints/mnband'][()]
+        print("Total bands are {}".format(mnb_fi))
 
-    ngk = f_fi['mf_header/kpoints/ngk'][()]
-    ngk_sum = np.cumsum(ngk)
-    ngk_sum = np.insert(ngk_sum, 0, 0, axis=0)     # dimension increase one
-    ngkmax = np.max(ngk)
+        ngk = f_fi['mf_header/kpoints/ngk'][()]
+        ngk_sum = np.cumsum(ngk)
+        ngk_sum = np.insert(ngk_sum, 0, 0, axis=0)     # dimension increase one
+        ngkmax = np.max(ngk)
 
 
-    print("")
-    print("Reading wfns ...")
+        print("")
+        print("Reading wfns ...")
 
-    tmp = f_fi['wfns/coeffs'][()]
-    tmp = tmp[:, :, :, 0] + 1j*tmp[:, :, :, 1]
+        print("The fermi level is at {}".format(self.ifmaxone))
+        print("The bands from {} to {} will be truncated".format(bstart+1, bend))
+        tmp = f_fi['wfns/coeffs'][bstart:bend]
 
-    print("Finished Reading wfns ...")
+        # tmp = f_fi['wfns/coeffs'][()]
+        tmp = tmp[:, :, :, 0] + 1j*tmp[:, :, :, 1]
 
-    nb_tmp, nspinor, ncplx_tot = tmp.shape
-    coeff_fi = np.zeros((nb_tmp, nspinor, nk_fi, ngkmax), dtype=complex)
+        print("Finished Reading wfns ...")
 
-    if use_ngk:
-        for i, igk in enumerate(ngk):
-            coeff_fi[:, :, i, :ngk[i]] = tmp[:, :, ngk_sum[i]:ngk_sum[i+1]]
-    else:
-        coeff_fi[:, :, :, :] = tmp.reshape(nb_tmp, nspinor, nk_fi, -1 )    # If we use hack version of BGW
+        nb_tmp, nspinor, ncplx_tot = tmp.shape
+        coeff_fi = np.zeros((nb_tmp, nspinor, nk_fi, ngkmax), dtype=complex)
 
-    coeff_fi = coeff_fi.transpose(2, 0, 1, 3)     # nk x nb x nspinor x ngkmax
-    # release memeory
-    tmp = None
-    f_fi.close()
+        if use_ngk:
+            for i, igk in enumerate(ngk):
+                coeff_fi[:, :, i, :ngk[i]] = tmp[:, :, ngk_sum[i]:ngk_sum[i+1]]
+        else:
+            coeff_fi[:, :, :, :] = tmp.reshape(nb_tmp, nspinor, nk_fi, -1 )    # If we use hack version of BGW
 
-    return coeff_fi
+        coeff_fi = coeff_fi.transpose(2, 0, 1, 3)     # nk x nb x nspinor x ngkmax
+        # release memeory
+        tmp = None
+        f_fi.close()
+
+        return coeff_fi
 
 
 def wfndot(v1, v2):
@@ -147,6 +156,9 @@ def checksum(dvv):
 
 def _overlap_2_center(fname1, fname2, nv_co, nc_co, nv_fi, nc_fi,\
                       idx_k0, gcut=None):
+    """
+    need wfndot, Wfn
+    """
 
     wfnco = Wfn(fname1)
     wfnfi = Wfn(fname2)
@@ -217,22 +229,6 @@ if __name__ == "__main__":
    #  line1 = np.where(np.abs(kpts[:, 1])<0.00001)[0]
    #  line2 = np.where(np.abs(kpts[:, 1] - kpts[:, 0])<0.00001)[0]
    #  dvv = dn0n[:, param.nv_co_k0-3:param.nv_co_k0 , 0:3 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
