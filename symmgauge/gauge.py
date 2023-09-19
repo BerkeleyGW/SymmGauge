@@ -74,6 +74,8 @@ class GaugeKp:
         # update the gauge field
         self.gauge_UN[np.ix_(range(nk), band_range, band_range)] = gauge_sub
 
+        return self.gauge_UN
+
     def update_dn0n(self, bstart, bend, k0_trans=None):
         """
         update dn0n, making n0 with regular character, e.g. eigensate of rotation opeartor.
