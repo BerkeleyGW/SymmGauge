@@ -58,12 +58,4 @@ def write_new_xct(fname_in, fname_out, gauge, nv, nc):
     return
 
 
-def rotate_vmtx_bgw(fname, gauge, nv):
-
-    return
-
-
-def write_new_vmtx():
-
-    return
 
