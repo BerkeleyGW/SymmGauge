@@ -21,11 +21,15 @@ class GaugeKp:
         self.gcut = gcut
         self.idx_k0 = idx_k0
 
-        self.dn0n = self.overlap2center(wfn, nv_fi, nc_fi, idx_k0)  # <u_dft_0|psi>
+        self.dn0n = self.overlap2center(wfn, nv_fi, nc_fi, idx_k0)  # <u_dft_0|psi> , will be
+                                                                    # updated to <u_reg_0 |psi >
         self.dn0chi = deepcopy(self.dn0n)
-        self.dn0n_init = deepcopy(self.dn0n)
+        self.dn0n_init = deepcopy(self.dn0n) # <u_dft_0|psi>
 
-        self.gauge_UN = np.ones_like(self.dn0n)
+        self.gauge_UN = np.zeros_like(self.dn0n)
+        for i, ele in enumerate(self.gauge_UN):
+            self.gauge_UN[i] = np.eye(len(ele), dtype=complex)
+
 
 
     def overlap2center(self, wfn, nv_fi, nc_fi, idx_k0, gcut=None):
@@ -116,6 +120,23 @@ class GaugeKp:
 
         return gauge_tran
 
+    def split_cc_vv(self, reorder=True):
+
+        nv = self.nv_fi
+        gauge_cc = self.gauge_UN[:, nv:, nv:]
+        gauge_cc_p =np.array([mat.conj() for mat in gauge_cc]) # <psi | chi>
+
+        gauge_vv = self.gauge_UN[:, :nv, :nv]
+        if reorder:
+            gauge_vv = np.flip(gauge_vv, (1,2))    # To match the order of BGW
+        gauge_vv_p = np.array([mat.conj() for mat in gauge_vv])
+
+
+        return gauge_cc, gauge_vv
+
+
+
+# ================== following is not maintanted ==============
 
 def _overlap_2_center(fname1, fname2, nv_co, nc_co, nv_fi, nc_fi,\
                       idx_k0, gcut=None):

@@ -107,7 +107,7 @@ class Wfn:
         print("Reading wfns ...")
 
         print("The fermi level is at {}".format(self.ifmaxone))
-        print("The bands from {} to {} will be truncated".format(bstart+1, bend))
+        print("The bands from {} to {} will be loaded".format(bstart+1, bend))
         tmp = f_fi['wfns/coeffs'][bstart:bend]
 
         # tmp = f_fi['wfns/coeffs'][()]
