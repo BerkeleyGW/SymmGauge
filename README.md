@@ -1,7 +1,8 @@
-A code for analyse ab-initio many body perturbation theory calculation
+A code for analysing ab-initio many-body perturbation theory calculation
 -------------
-1) construct smooth gauge using the concept "pseudo-Bloch functions". 
-2) perform symmetry analysis for single-particle and two-particle states(e.g. excitons) 
+construction of smooth gauge using the concept "pseudo-Bloch functions", k dot p Hamiltonian contruction at ab-inito level,
+symmetry analysis for single-particle and two-particle states(e.g. excitons). 
+Details please refer (https://www.pnas.org/doi/abs/10.1073/pnas.2307611120) 
 
 
 Documentation
@@ -19,7 +20,7 @@ The following software and modules are required to use BGWpy.
   * python 3.0+ 
   * numpy 1.6+      (http://www.scipy.org/)
   * BerkeleyGW 2.0+ (http://www.berkeleygw.org/)
-  * hdf5py
+  * h5py
 
 Installing
 ----------
