@@ -5,7 +5,7 @@ from subprocess import call
 
 class Xct:
 
-    def __init__(self, fname='eigenvectors.h5',  mffile=None, gaugecls=None):
+    def __init__(self, fname='eigenvectors.h5',  vmtcls=None, gaugecls=None):
 
 
         self.init_from_file(fname)
@@ -24,6 +24,11 @@ class Xct:
    #          if gaugecls:
    #              self.dipoles_rl_smth = self.gauge_trans(self.dipoles_rl, gaugecls)
    #              self.save_data()
+
+        if vmtcls:
+            print("calculate the r_eh")
+
+
 
 
     def init_from_file(self, fname):
@@ -78,8 +83,8 @@ class Xct:
 
 
         gauge_cc, gauge_vv = gaugecls.split_cc_vv(reorder=True)
-        gauge_cc_p =np.array([mat.conj() for mat in gauge_cc]) # <psi | chi>
-        gauge_vv_p = np.array([mat.conj() for mat in gauge_vv])
+        gauge_cc_p =np.array([mat.conj().T for mat in gauge_cc]) # <psi | chi>
+        gauge_vv_p = np.array([mat.conj().T for mat in gauge_vv])
 
         from copy import deepcopy
         cvkfield_smth = deepcopy(cvkfield)

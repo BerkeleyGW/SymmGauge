@@ -10,12 +10,12 @@ def rotate_avck(cvkfield, gauge, nv, nc, reorder=True):
     # gauge :  < chi | psi >,   nk * (nc + nv) * (nc+nv)
 
     gauge_cc = gauge[:, nv:, nv:]
-    gauge_cc_p =np.array([mat.conj() for mat in gauge_cc]) # <psi | chi>
+    gauge_cc_p =np.array([mat.conj().T for mat in gauge_cc]) # <psi | chi>
 
     gauge_vv = gauge[:, :nv, :nv]
     if reorder:
         gauge_vv = np.flip(gauge_vv, (1,2))    # To match the order of BGW
-    gauge_vv_p = np.array([mat.conj() for mat in gauge_vv])
+    gauge_vv_p = np.array([mat.conj().T for mat in gauge_vv])
 
     if cvkfield.ndim == 4:    # acvk field
         nx, nk, nc_x, nv_x = cvkfield.shape

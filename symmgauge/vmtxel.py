@@ -1,9 +1,10 @@
 import numpy as np
 import h5py
+from symmgauge.utility import svd_like
 
 class Vmtxel:
 
-    def __init__(self, inputmode='BGW_ascii', xy2lr=True, mffile=None, gaugecls=None):
+    def __init__(self, inputmode='BGW_ascii', mffile='wfn.h5', xy2lr=True,  gaugecls=None):
 
         self.k_cart, self.bvec = self.read_mfs(mffile)    # currently focus on xy plane
 
@@ -195,8 +196,8 @@ class Vmtxel:
 
 
         gauge_cc, gauge_vv = gaugecls.split_cc_vv(reorder=True)
-        gauge_cc_p =np.array([mat.conj() for mat in gauge_cc]) # <psi | chi>
-        gauge_vv_p = np.array([mat.conj() for mat in gauge_vv])
+        gauge_cc_p =np.array([mat.conj().T for mat in gauge_cc]) # <psi | chi>
+        gauge_vv_p = np.array([mat.conj().T for mat in gauge_vv])
 
         from copy import deepcopy
         dipoles_smth = deepcopy(dipoles)
@@ -216,3 +217,21 @@ class Vmtxel:
         except AttributeError:
             print("dipoles_rl_smth not exit, only save the raw data")
             np.savez("dipoles_gauged.npz", k_cart = self.k_cart, dipoles=self.dipoles)
+
+
+    def cal_k0_trans(self, idx_k0, crange, vrange):
+
+        iis = 0;
+        subrange = np.ix_(range(*crange),range(*vrange),range(2))
+        tmp = self.dipoles_rl[iis, idx_k0][subrange]
+        tmp = tmp[:,0,:]        # nc x npol,  <c|r|v>
+        submat = tmp.conj().T    # npol x nc, <v|r|c>
+
+        k0_trans = svd_like(submat)
+
+        return k0_trans
+
+
+
+
+

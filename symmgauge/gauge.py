@@ -83,9 +83,10 @@ class GaugeKp:
     def update_dn0n(self, bstart, bend, k0_trans=None):
         """
         update dn0n, making n0 with regular character, e.g. eigensate of rotation opeartor.
-        k0_trans:  < dft_0 | reg_0 >
+        NOT USES. k0_trans:  < dft_0 | reg_0 >
+        k0_trans:  < reg_0 | psi_0 >
         """
-        if k0_trans:
+        if k0_trans is not None:
             if bend - bstart != len(k0_trans):
                 raise Exception('provided matrix dimension is not consistent with # selected bands')
 
@@ -97,7 +98,7 @@ class GaugeKp:
 
             dm0m = dn0n_old[np.ix_(range(nk), band_range, band_range)]   # subspace
             # <reg_co_zero | fi >
-            dm0m = np.einsum("ij,kjf->kif", np.linalg.inv(k0_trans), dm0m)    # <reg_0|dft_0> * <dft_0 | fi >
+            dm0m = np.einsum("ij,kjf->kif", k0_trans, dm0m)    # <reg_0|dft_0> * <dft_0 | fi >
 
             print("dn0n is updated")
             self.dn0n[np.ix_(range(nk), band_range, band_range)] = dm0m
