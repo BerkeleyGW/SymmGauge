@@ -1,4 +1,4 @@
-A code for analysing ab-initio many-body perturbation theory calculation
+A code for analysing ab-initio many-body perturbation theory calculations
 -------------
 Construction of smooth gauge using the concept "pseudo-Bloch functions", contruction of k.p Hamiltonian at the ab-inito level,
 symmetry analysis for single-particle and two-particle states(e.g. excitons). 

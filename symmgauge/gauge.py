@@ -59,28 +59,58 @@ class GaugeKp:
         return dn0n
 
 
-    def update_gauge(self, bstart, bend, dn0n):
+    def update_gauge(self, band_inds, dn0n):
 
         """
         update gauge matrix.
         """
-        # bstart = self.nv_fi + ibstart
-        # bend = self.nv_fi + ibend
-        band_range = list(range(bstart, bend))
         nk, nb, _ = dn0n.shape
+        bend = band_inds[-1]
+        bstart = band_inds[0]
         if bend > nb or bstart < 0 :
             raise Exception('setcted band is not in the bands provided')
 
-        dm0m = dn0n[np.ix_(range(nk), band_range, band_range)]   # subspace
+        dm0m = dn0n[np.ix_(range(nk), band_inds, band_inds)]   # subspace
 
         gauge_sub = self.svd_like(dm0m)   # < chi| psi >
 
         # update the gauge field
-        self.gauge_UN[np.ix_(range(nk), band_range, band_range)] = gauge_sub
+        self.gauge_UN[np.ix_(range(nk), band_inds, band_inds)] = gauge_sub
 
         return self.gauge_UN
 
-    def update_dn0n(self, bstart, bend, k0_trans=None):
+    def update_dn0n(self, band_inds, k0_trans=None):
+        """
+        update dn0n, making n0 with regular character, e.g. eigensate of rotation opeartor.
+        Will NOT LONGER USE k0_trans:  < dft_0 | reg_0 >
+        k0_trans:  < reg_0 | psi_0 >
+        """
+
+        if k0_trans is not None:
+            if len(band_inds) != len(k0_trans):
+                raise Exception('provided matrix dimension is not consistent with # selected bands')
+
+            dn0n_old = self.dn0n
+            nk, nb, _ = dn0n_old.shape
+            bend = band_inds[-1]
+            bstart = band_inds[0]
+            if bend > nb or bstart < 0 :
+                raise Exception('setcted band is not in the bands provided')
+
+            dm0m = dn0n_old[np.ix_(range(nk), band_inds, band_inds)]   # subspace
+            # <reg_co_zero | fi >
+            dm0m = np.einsum("ij,kjf->kif", k0_trans, dm0m)    # <reg_0|dft_0> * <dft_0 | fi >
+
+            print("dn0n is updated")
+            self.dn0n[np.ix_(range(nk), band_inds, band_inds)] = dm0m
+
+            return self.dn0n
+
+        else:
+            return self.dn0n
+
+
+    def update_dn0n_old(self, bstart, bend, k0_trans=None):
         """
         update dn0n, making n0 with regular character, e.g. eigensate of rotation opeartor.
         Will NOT LONGER USE k0_trans:  < dft_0 | reg_0 >
@@ -107,8 +137,6 @@ class GaugeKp:
 
         else:
             return self.dn0n
-
-
 
     def svd_like(self, dm0m):
         '''get the gauge transformation matrix  '''

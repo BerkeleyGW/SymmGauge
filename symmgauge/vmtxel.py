@@ -4,7 +4,8 @@ from symmgauge.utility import svd_like
 
 class Vmtxel:
 
-    def __init__(self, vmtseedname='eigenvalues', inputmode='BGW', mffile='wfn.h5', xy2lr=True,  gaugecls=None):
+    def __init__(self, vmtseedname='eigenvalues', inputmode='BGW', mffile='wfn.h5', \
+                  gaugecls=None):
         """
         we need to switch from inputmode to be vmtfile
         """
@@ -17,8 +18,6 @@ class Vmtxel:
 
         if gaugecls:
             self.dipoles_smth = self.gauge_trans(self.dipoles, gaugecls)
-
-        # if xy2lr:
 
         self.bIl, self.bIcp = self.bvecIlin_cir(self.bvec)
         self.dipoles_rl = self.rotate_dipole(self.dipoles, self.bIcp)
@@ -226,27 +225,31 @@ class Vmtxel:
             np.savez("dipoles_gauged.npz", k_cart = self.k_cart, dipoles=self.dipoles)
 
 
-    def cal_k0_trans(self, idx_k0, crange, vrange):
+    def cal_k0_trans(self, idx_k0, cinds=None, vinds=None):
+    # def cal_k0_trans(self, idx_k0, crange, vrange):
 
         iis = 0;
-        deg_pol = [0,2]    # assume in-plane dengenerate
-        subrange = np.ix_(range(*crange),range(*vrange),range(*deg_pol))
+        inplane_inds = [0,1]    # assume in-plane dengenerate
+        subrange = np.ix_(cinds, vinds, inplane_inds)
         tmp = self.dipoles_rl[iis, idx_k0][subrange]
 
-        if len(range(*crange)) == 2:
-            print("\n Conduction states are DOUBLY degenerate")
-            print(" Only one non-degnerate valence state that is optically coupled")
-            print(" to the degenerate conduction bands will be considered")
+        if len(cinds) == 2:
+            print("\n Calculating transformation matrix in k0")
+            print("   Conduction states are DOUBLY degenerate")
+            print("   Use only one non-degnerate valence state that is optically coupled")
+            print("   to the degenerate conduction bands")
 
             iv = 0
             tmp = tmp[:,iv,:]              # nc x npol,  <c|r|v>, only pick one v band
             submat = tmp.conj().T          # npol x nc, <v|r|c>, making pol to be axis 0
             k0_trans = svd_like(submat)    # return < c_reg | c_dft >
 
-        elif len(range(*vrange)) == 2:    # v bands degenerate
-            print("\n Valence states are DOUBLY degenerate")
-            print(" Only one non-degnerate conduction state that is optically coupled")
-            print(" to the degenerate valence bands will be considered")
+        elif len(vinds) == 2:    # v bands degenerate
+            print("\n Calculating transformation matrix in k0")
+            print("   Valence states are DOUBLY degenerate")
+            print("   Use only one non-degnerate couduction state that is optically coupled")
+            print("   to the degenerate valence bands")
+
             ic = 0
             tmp = tmp[ic,:,:]              # nv x npol,  <c|r|v>, only pick one v band
             submat = tmp.T                 # NOTE: no conjecture, but sitll making pol to be axis 0
