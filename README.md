@@ -15,7 +15,7 @@ with the source distribution in ~SymmGauge/examples/
 Requirements
 ------------
 
-The following software and modules are required to use BGWpy.
+The following software and modules are required to use SymmGauge.
 
   * python 3.0+ 
   * numpy 1.6+      (http://www.scipy.org/)
