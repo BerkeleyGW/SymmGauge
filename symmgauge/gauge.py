@@ -83,7 +83,7 @@ class GaugeKp:
     def update_dn0n(self, bstart, bend, k0_trans=None):
         """
         update dn0n, making n0 with regular character, e.g. eigensate of rotation opeartor.
-        NOT USES. k0_trans:  < dft_0 | reg_0 >
+        Will NOT LONGER USE k0_trans:  < dft_0 | reg_0 >
         k0_trans:  < reg_0 | psi_0 >
         """
         if k0_trans is not None:

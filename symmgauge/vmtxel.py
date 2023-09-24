@@ -4,24 +4,28 @@ from symmgauge.utility import svd_like
 
 class Vmtxel:
 
-    def __init__(self, inputmode='BGW_ascii', mffile='wfn.h5', xy2lr=True,  gaugecls=None):
+    def __init__(self, vmtseedname='eigenvalues', inputmode='BGW', mffile='wfn.h5', xy2lr=True,  gaugecls=None):
+        """
+        we need to switch from inputmode to be vmtfile
+        """
 
         self.k_cart, self.bvec = self.read_mfs(mffile)    # currently focus on xy plane
 
-        if inputmode == 'BGW_ascii':
-            self.dipoles, self.de = self.init_from_bgw_ascii()
+        if (inputmode == 'BGW_ascii') or ("eigenvalues" in vmtseedname):
+            self.vmtseedname= vmtseedname
+            self.dipoles, self.de = self.init_from_bgw_ascii(vmtseedname)
 
         if gaugecls:
             self.dipoles_smth = self.gauge_trans(self.dipoles, gaugecls)
 
-        if xy2lr:
+        # if xy2lr:
 
-            self.bIl, self.bIcp = self.bvecIlin_cir(self.bvec)
-            self.dipoles_rl = self.rotate_dipole(self.dipoles, self.bIcp)
+        self.bIl, self.bIcp = self.bvecIlin_cir(self.bvec)
+        self.dipoles_rl = self.rotate_dipole(self.dipoles, self.bIcp)
 
-            if gaugecls:
-                self.dipoles_rl_smth = self.gauge_trans(self.dipoles_rl, gaugecls)
-                self.save_data()
+        if gaugecls:
+            self.dipoles_rl_smth = self.gauge_trans(self.dipoles_rl, gaugecls)
+            self.save_data()
 
 
     def read_mfs(self, fname):
@@ -81,16 +85,19 @@ class Vmtxel:
         return bIl, bIcp
 
 
-    def init_from_bgw_ascii(self):
+    def init_from_bgw_ascii(self, vmtseedname):
         """
         The format of dipole:  <c|r|v>
 
         """
 
-        f1 = 'eigenvalues_b1_noeh.dat'
-        f2 = 'eigenvalues_b2_noeh.dat'
-        f3 = 'eigenvalues_b3_noeh.dat'
-        fklist = '2-tmp.patchkgrid.out'
+        # f1 = 'eigenvalues_b1_noeh.dat'
+        # f2 = 'eigenvalues_b2_noeh.dat'
+        # f3 = 'eigenvalues_b3_noeh.dat'
+
+        f1 = vmtseedname + '_b1_noeh.dat'
+        f2 = vmtseedname + '_b2_noeh.dat'
+        f3 = vmtseedname + '_b3_noeh.dat'
 
         with open(f1) as f:
             lines = f.readlines()
@@ -222,12 +229,29 @@ class Vmtxel:
     def cal_k0_trans(self, idx_k0, crange, vrange):
 
         iis = 0;
-        subrange = np.ix_(range(*crange),range(*vrange),range(2))
+        deg_pol = [0,2]    # assume in-plane dengenerate
+        subrange = np.ix_(range(*crange),range(*vrange),range(*deg_pol))
         tmp = self.dipoles_rl[iis, idx_k0][subrange]
-        tmp = tmp[:,0,:]        # nc x npol,  <c|r|v>
-        submat = tmp.conj().T    # npol x nc, <v|r|c>
 
-        k0_trans = svd_like(submat)
+        if len(range(*crange)) == 2:
+            print("\n Conduction states are DOUBLY degenerate")
+            print(" Only one non-degnerate valence state that is optically coupled")
+            print(" to the degenerate conduction bands will be considered")
+
+            iv = 0
+            tmp = tmp[:,iv,:]              # nc x npol,  <c|r|v>, only pick one v band
+            submat = tmp.conj().T          # npol x nc, <v|r|c>, making pol to be axis 0
+            k0_trans = svd_like(submat)    # return < c_reg | c_dft >
+
+        elif len(range(*vrange)) == 2:    # v bands degenerate
+            print("\n Valence states are DOUBLY degenerate")
+            print(" Only one non-degnerate conduction state that is optically coupled")
+            print(" to the degenerate valence bands will be considered")
+            ic = 0
+            tmp = tmp[ic,:,:]              # nv x npol,  <c|r|v>, only pick one v band
+            submat = tmp.T                 # NOTE: no conjecture, but sitll making pol to be axis 0
+            k0_trans = svd_like(submat)    # return < v_reg | v_dft >
+
 
         return k0_trans
 
