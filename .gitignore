@@ -8,7 +8,7 @@ __pycache__/
 
 .vscode
 
-*.h5
+# *.h5
 *.npz
 *.npy
 
@@ -36,6 +36,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-examples/
+# examples/
 
 tags
