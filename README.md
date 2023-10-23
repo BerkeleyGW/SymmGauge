@@ -34,9 +34,4 @@ Once you have satisfied the requirements, install the package with
 
 
 
-License
--------
-
-This software is free to use under the BSD license.
-See license.txt for more information.
 
