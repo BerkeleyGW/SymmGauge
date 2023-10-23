@@ -19,5 +19,5 @@ setuptools.setup(
                         ],
      packages=setuptools.find_packages(),
      license='LICENSE.txt',
-     zip_safe = False,
+     # zip_safe = False,   # need python 3.9
 )
