@@ -14,10 +14,8 @@ setuptools.setup(
      long_description=long_description,
      python_requires='>=3.6',
      install_requires = [
-                        'numpy>=1.18',
-                        'scipy>=1.0',
                         ],
      packages=setuptools.find_packages(),
      license='LICENSE.txt',
-     # zip_safe = False,   # need python 3.9
+     zip_safe = False,
 )
