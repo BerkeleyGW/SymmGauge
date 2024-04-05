@@ -1,4 +1,4 @@
-<a href="url"><img src="https://github.com/phycomdoc/SymmGauge/blob/main/dev/logo/symmgauge.png" height="300" ></a><br clear="all" />
+<a href="url"><img src="https://github.com/BerkeleyGW/SymmGauge/blob/main/dev/logo/symmgauge.png" height="300" ></a><br clear="all" />
 
 
 A code for analysing ab-initio many-body perturbation theory calculations
